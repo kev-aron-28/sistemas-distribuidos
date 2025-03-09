@@ -44,7 +44,6 @@ public class Main extends JPanel {
             plane.updateMovement();
         }
 
-        // Verificar colisiones
         for (Airplane chaser : planes) {
             if (chaser != mainPlain && chaser.hasCollided(mainPlain)) {
                 
