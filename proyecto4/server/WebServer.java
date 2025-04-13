@@ -16,16 +16,27 @@ import java.util.concurrent.Executors;
      private static final String TASK_ENDPOINT = "/task";
      private static final String STATUS_ENDPOINT = "/status";
      private static final String SEARCH_ENDPOINT = "/search";
- 
+
      private final int port;
+
      private HttpServer server;
+
+     private static  SearchWorker worker = new SearchWorker();
  
      public static void main(String[] args) {
          int serverPort = 8080;
          if (args.length == 1) {
              serverPort = Integer.parseInt(args[0]);
          }
- 
+    
+        String token = "ya29.a0AZYkNZgl7dbLOs8yHa5NyJwDigQKG6jgmXGJ-Xwh_l_NsjJPZPK5YklYw9lJqMCIW8Hy3T8Nm0TJ-V7Nz9kgMAAh99Hi3F5sYADnz0Nriz29h4-W9Pau6N3WO42zEq2FbiOI9juFhcZ7kqKnnhyB7ocAr-GzXeCu9Xnyb2J9MgRrcQ_Vc4AMdZ-LJHHmd4efY7214__qkEwSiYJhyAS2KFPtjheq8FAFaHbl8KgjJaMHrN-3WfujNsyKVmnUH6OeNkfyqRrxgfSGcD5p394tjS0m_Lx2_ACRxFjqpp80YPsngJei4QFZmNeTpZ1CqwcoW1zjPbJfMXL21c0W2TnYICLw9ZH1LLuDvlc1haKDmvVWEKwPRmk-G8vIvKhlX5QcVmOXqUlmqhjuf8rdjm-ERTtVnV9HmwaOogxETAaCgYKAR8SARASFQHGX2MiJXVjATBKUg3GN171-C1CqA0429";
+        
+        String bucket = "ukranio-project";
+
+        worker.setBucket(bucket);
+
+        worker.setToken(token);
+
          WebServer webServer = new WebServer(serverPort);
          webServer.startServer();
  
@@ -67,19 +78,15 @@ import java.util.concurrent.Executors;
 
         String keyword = query.getOrDefault("q", "default");
 
-        String token = "";
-        String bucket = "ukranio-project";
+        if (keyword.equalsIgnoreCase("reset")) {
+            this.worker.clearHashMap();
+            String text = "Reiniciando contador";
+            sendResponse(text.getBytes(), exchange);
+        } else {
+            String result = this.worker.search(keyword);
 
-        // Crea una instancia de SearchWorker para realizar la búsqueda
-        SearchWorker worker = new SearchWorker(bucket, token);
-
-        worker.search(keyword);
-
-        // Llama a la búsqueda
-        String result = "Hola soy kevin"; // Realiza la búsqueda de la palabra clave en los archivos PDF
-
-        // Envía la respuesta con los resultados
-        sendResponse(result.getBytes(), exchange);
+            sendResponse(result.getBytes(), exchange);
+        }
     }
  
 

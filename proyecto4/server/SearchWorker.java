@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -14,11 +15,21 @@ import org.apache.pdfbox.text.PDFTextStripper;
 
 public class SearchWorker {
 
-    private final String bucket;
-    private final String token;
+    private String bucket;
+    private String token;
 
-    public SearchWorker(String bucket, String token) {
+    private Map<String, Map<String, Integer>> fileOccurrences = new HashMap<>();
+
+
+    public SearchWorker() {
+
+    }
+
+    public void setBucket(String bucket) {
         this.bucket = bucket;
+    }
+
+    public void setToken(String token) {
         this.token = token;
     }
 
@@ -27,13 +38,37 @@ public class SearchWorker {
         StringBuilder result = new StringBuilder();
 
         for (String file : files) {
-            System.out.println(file);
-            byte[] pdfBytes = downloadPdf(bucket, file);
-            String text = extractTextFromPdf(pdfBytes);
+            Map<String, Integer> wordOccurrences = fileOccurrences.computeIfAbsent(file, k -> new HashMap<>());
 
-            // if (text.toLowerCase().contains(keyword.toLowerCase())) {
-            //     result.append("✅ ").append(file).append(" contiene la palabra '").append(keyword).append("'\n\n");
-            // }
+            int ocurrencia = wordOccurrences.getOrDefault(keyword.toLowerCase(), 0) + 1;
+
+            byte[] pdfBytes = downloadPdf(bucket, file);
+            
+            String matchedSentence = findNthSentenceWithWord(pdfBytes, keyword, ocurrencia);
+
+            String translated = "";
+
+            if (matchedSentence != null) {
+                try {
+                    translated = Translator.translateText(matchedSentence, "ES");
+                } catch (Exception e) {
+                    translated = "Error al traducir: " + e.getMessage();
+                }
+
+                wordOccurrences.put(keyword.toLowerCase(), ocurrencia);
+
+                result.append("Libro: ").append(file).append("\n")
+                      .append("Ocurrencia #").append(ocurrencia).append(" de '").append(keyword).append("':\n")
+                      .append("\n")
+                      .append(highlightWord(matchedSentence, keyword)).append("\n")
+                      .append("\n")
+                      .append(translated).append("\n")
+                      .append("─────────────────────────────────────────────\n");
+            }
+        }
+
+        if (result.length() == 0) {
+            result.append("No se encontro la palabra '").append(keyword).append("' en ningun texto.\n");
         }
 
         return result.toString();
@@ -97,9 +132,37 @@ public class SearchWorker {
         return out.toByteArray();
     }
 
-    private String extractTextFromPdf(byte[] pdfBytes) throws IOException {
-        try (PDDocument doc = PDDocument.load(pdfBytes)) {
-            return new PDFTextStripper().getText(doc);
+    public void clearHashMap() {
+        fileOccurrences.clear();
+    }
+
+    private String findNthSentenceWithWord(byte[] pdfBytes, String keyword, int n) throws IOException {
+        try (PDDocument document = PDDocument.load(new ByteArrayInputStream(pdfBytes))) {
+            PDFTextStripper stripper = new PDFTextStripper();
+
+            int found = 0;
+
+            for (int i = 1; i <= document.getNumberOfPages(); i++) {
+                stripper.setStartPage(i);
+                stripper.setEndPage(i);
+                String pageText = stripper.getText(document);
+
+                String[] sentences = pageText.split("(?<=[.!?])\\s+");
+
+                for (String sentence : sentences) {
+                    if (sentence.toLowerCase().contains(keyword.toLowerCase())) {
+                        found++;
+                        if (found == n) {
+                            return sentence.trim();
+                        }
+                    }
+                }
+            }
         }
+        return null;
+    }
+
+    private String highlightWord(String text, String keyword) {
+        return text.replaceAll("(?i)(" + Pattern.quote(keyword) + ")", "\u001B[31m$1\u001B[0m");
     }
 }
