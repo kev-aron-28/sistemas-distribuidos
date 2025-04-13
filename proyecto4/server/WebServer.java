@@ -29,10 +29,7 @@ import java.util.concurrent.Executors;
              serverPort = Integer.parseInt(args[0]);
          }
     
-        String token = "";
         
-        String bucket = "ukranio-project";
-
         worker.setBucket(bucket);
 
         worker.setToken(token);
