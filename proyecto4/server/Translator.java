@@ -7,7 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Translator {
-    private static final String TRANSLATE_API_KEY = "AIzaSyBFqNhRSv8ay2EpN2zwrWWSlLkFV21bRXU";
+    private static final String TRANSLATE_API_KEY = "";
     private static final String TRANSLATE_URL = "https://translation.googleapis.com/language/translate/v2?key=" + TRANSLATE_API_KEY;
 
     public static String translateText(String text, String targetLang) throws IOException, InterruptedException {

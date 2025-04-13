@@ -29,7 +29,7 @@ import java.util.concurrent.Executors;
              serverPort = Integer.parseInt(args[0]);
          }
     
-        String token = "ya29.a0AZYkNZgl7dbLOs8yHa5NyJwDigQKG6jgmXGJ-Xwh_l_NsjJPZPK5YklYw9lJqMCIW8Hy3T8Nm0TJ-V7Nz9kgMAAh99Hi3F5sYADnz0Nriz29h4-W9Pau6N3WO42zEq2FbiOI9juFhcZ7kqKnnhyB7ocAr-GzXeCu9Xnyb2J9MgRrcQ_Vc4AMdZ-LJHHmd4efY7214__qkEwSiYJhyAS2KFPtjheq8FAFaHbl8KgjJaMHrN-3WfujNsyKVmnUH6OeNkfyqRrxgfSGcD5p394tjS0m_Lx2_ACRxFjqpp80YPsngJei4QFZmNeTpZ1CqwcoW1zjPbJfMXL21c0W2TnYICLw9ZH1LLuDvlc1haKDmvVWEKwPRmk-G8vIvKhlX5QcVmOXqUlmqhjuf8rdjm-ERTtVnV9HmwaOogxETAaCgYKAR8SARASFQHGX2MiJXVjATBKUg3GN171-C1CqA0429";
+        String token = "";
         
         String bucket = "ukranio-project";
 
